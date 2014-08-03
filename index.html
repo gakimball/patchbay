@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+
+<title>PatchBay.js</title>
+<!-- <link rel="stylesheet" href="style.css"> -->
+<style>
+  .is-active {
+    border: 2px solid #d5bbbc;
+  }
+  .is-playing {
+    border: 2px solid red;
+  }
+</style>
+
+</head>
+<body>
+
+<div data-patchbay-track="url:/audio/caspiar.mp3" data-patchbay-autoplay>
+  <p data-patchbay-ui="title">Neurons</p>
+  <p data-patchbay-ui="artist">Caspiar</p>
+  <a href="#" data-patchbay-ui="playpause" data-alt="Pause">Play</a>
+</div>
+
+<div data-patchbay-track="url:/audio/cigs.mp3" data-patchbay-autoplay>
+  <p data-patchbay-ui="title">John Wayne</p>
+  <p data-patchbay-ui="artist">Cigarettes and Milk</p>
+  <a href="#" data-patchbay-ui="playpause" data-alt="Pause">Play</a>
+</div>
+
+<div data-patchbay-master>
+  <a href="#" data-patchbay-ui="playpause" data-alt="Pause">Play</a>
+  <p data-patchbay-ui="title"></p>
+  <p data-patchbay-ui="artist"></p>
+  <p><span data-patchbay-ui="currenttime">0:00</span> / <span data-patchbay-ui="duration">0:00</span></p>
+</div>
+
+<script src="js/jquery.js"></script>
+<script src="js/patchbay.js"></script>
+
+</body>
+</html>
