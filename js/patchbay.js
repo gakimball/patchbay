@@ -36,12 +36,16 @@ Player.prototype = {
     // If the player has playpause text, swap the "play" and "pause" text when the player state changes
     // The text to swap to is stored in the data attribute "alt" on the text element
     if (this.ui.playpause) {
-      $(window).on('patchbay-playing patchbay-paused', function() {
-        if (_this.active) {
-          var newText = _this.ui.playpause.attr('data-alt');
-          _this.ui.playpause
-            .attr('data-alt', _this.ui.playpause.text())
-            .text(newText);
+      $(window).on({
+        'patchbay-playing': function() {
+          if (_this.active) {
+            _this.ui.playpause.text(Patchbay.settings.pauseText);
+          }
+        },
+        'patchbay-paused': function() {
+          if (_this.active) {
+            _this.ui.playpause.text(Patchbay.settings.playText);
+          }
         }
       });
     }
@@ -102,7 +106,6 @@ MasterPlayer.prototype = $.extend({
           if (_this.initialized) _this.playPause();
         }
         else if (source instanceof InlinePlayer) {
-          console.log(source);
           if (!source.active) {
             _this.loadTrack(source);
           }
@@ -165,6 +168,9 @@ MasterPlayer.prototype = $.extend({
   loadTrack: function(source) {
     var _this = this
       , trackInfo = source.getTrackInfo();
+
+    // Pause existing audio before destroying it
+    this.pause();
 
     // Inserting source elements
     this.$audioPlayer.empty();
@@ -324,16 +330,27 @@ Patchbay = {
   inlinePlayers: [],
   settings: {
     server: window.location.origin,
-    scope: document
+    scope: document,
+    autosweep: true,
+    playText: 'Play',
+    pauseText: 'Pause'
   },
-  init: function(settings, autosweep) {
+  /*
+    Initialize the Patchbay plugin, importing developer settings.
+    By default the plugin will scan for audio players, unless the developer specifies otherwise.
+  */
+  init: function(settings) {
     this.settings = $.extend(this.settings, settings);
-    if (autosweep !== false) {
+    if (this.settings.autosweep) {
       this.sweep();
     }
 
     console.log(this);
   },
+  /*
+    Search the page for audio players, which use the data attributes "patchbay-master" and "patchbay-player".
+    On subsequent sweeps, players already initialized will be skipped.
+  */
   sweep: function() {
     var _this = this;
 
@@ -356,19 +373,27 @@ Patchbay = {
     }
 
     // Sweep the page for uninitialized inline players
-    $(this.settings.scope).find('[data-patchbay-track]').not('[data-patchbay-initialized]').each(function() {
+    $(this.settings.scope).find('[data-patchbay-track]').not('.is-initialized').each(function() {
       _this.inlinePlayers.push(new InlinePlayer($(this)));
     });
 
     // TODO: Sweep the page for uninitialized collections
   },
+  /*
+    Utility functions
+  */
   util: {
+    /*
+      Convert an integer (number of seconds) to a timestamp with the format m:ss.
+    */
     secToStamp: function(seconds) {
       var min = parseInt(seconds / 60)
       var sec = (seconds % 60 < 10) ? ('0'+parseInt(seconds % 60)) : parseInt(seconds % 60);
       return min+':'+sec;
     },
-    // Not quite sure when I'll need this
+    /*
+      Convert a timestamp with the format mm:ss to an integar equalling the number of seconds.
+    */
     stampToSec: function(stamp) {
       var stamp = stamp.split(':');
       return (stamp[0] * 60) + parseInt(stamp[1]);
